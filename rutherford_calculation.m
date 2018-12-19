@@ -125,17 +125,17 @@ BCair_keV = BCair_eV *10^-3*(5.91*10^22) *10^-15 * 10^-4;
 % nucleus: we have to use formula (4.10) with E = Tmc: in the centre of
 % mass system:
 E_corr = Tmc * 10^6 * elementar; %J
-sigma_min_corr = ((Zalpha * ZAu * epsilon2)/(4* E_corr^2))^2 * 1/sin(Thetamax / 2)^4;
-    %=0.006340318283385
-sigma_max_corr = ((Zalpha * ZAu * epsilon2)/(4* E_corr^2))^2 * 1/sin(Thetamin / 2)^4;
-    %=0.038359494392539
+sigma_min_corr = ((Zalpha * ZAu * epsilon2)/(4* E_corr))^2 * 1/sin(Thetamax / 2)^4;
+    %=4.4638e-27
+sigma_max_corr = ((Zalpha * ZAu * epsilon2)/(4* E_corr))^2 * 1/sin(Thetamin / 2)^4;
+    %=2.7006e-26
 
 % m) differential cross section area for xmin; with respect to finite
 % dimension of foil and detector
 % note: xmin <-> thetamax; and Tm [MeV]-> E [J]
 E = Tm * 10^6 * elementar; %J
-sigma_min = ((Zalpha * ZAu * epsilon2)/(4* E^2))^2 * 1/sin(Thetamax / 2)^4;
-    %=0.0054 
+sigma_min = ((Zalpha * ZAu * epsilon2)/(4* E))^2 * 1/sin(Thetamax / 2)^4;
+    %=4.1188e-27 
     
   % correction is given by dividing (4.10)/ (4.12) from the instr. manual:
   corrmin = 1/(1-2*(malpha / mAu)^2 * sin(Thetamin / 2)^4);
