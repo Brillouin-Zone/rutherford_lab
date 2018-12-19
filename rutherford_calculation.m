@@ -63,8 +63,8 @@ xmin = 5*10^-2; %m; without error
 xmax = 15*10^-2; %m; without error
 Thetamin = 0.52; %rad
 Thetamax = 0.83; % rad
-bmax = Zalpha * ZAu * epsilon2 *cot(Thetamin /2) / 2E0; %=6.8515e-26 m
-bmin = Zalpha * ZAu * epsilon2 *cot(Thetamax /2) / 2E0; %=4.1368e-26 m
+bmax = (Zalpha * ZAu * epsilon2) / (tan(Thetamin /2) * 2*E0); %=7.8436e-14 m
+bmin = (Zalpha * ZAu * epsilon2) /(tan(Thetamax /2) * 2*E0); %=4.7359e-14 m
 impact = [bmin, bmax];
 
 % g): deviations from Rutherford formula for used energy range:
@@ -117,15 +117,14 @@ Eup; % = [max: 0.1003; min: 0.0369] MeV
 Kair = 0.710; % correction
 EBair = 94.22; % in eV
 ZN = 7;
-BCair_eV =  (3.80 / (Tm) * ZN * log((548.58 * Tm) /(EBair) - Kair));
-    %= 74.3576
+BCair_eV =  (3.80 / (Tm) * ZN * log((548.58 * Tm) /(EBair) - Kair)); %= 74.3576
 BCair_keV = BCair_eV *10^-3*(5.91*10^22) *10^-15 * 10^-4;
     % =439.45 keV/mu m; should be: 522keV/mu m
 
 % l): correction for \sigma(\theta) with respect to finite mass of gold
 % nucleus: we have to use formula (4.10) with E = Tmc: in the centre of
 % mass system:
-E_corr = Tmc * 10^6 * elementar; %V
+E_corr = Tmc * 10^6 * elementar; %J
 sigma_min_corr = ((Zalpha * ZAu * epsilon2)/(4* E_corr^2))^2 * 1/sin(Thetamax / 2)^4;
     %=0.006340318283385
 sigma_max_corr = ((Zalpha * ZAu * epsilon2)/(4* E_corr^2))^2 * 1/sin(Thetamin / 2)^4;
@@ -133,8 +132,8 @@ sigma_max_corr = ((Zalpha * ZAu * epsilon2)/(4* E_corr^2))^2 * 1/sin(Thetamin / 
 
 % m) differential cross section area for xmin; with respect to finite
 % dimension of foil and detector
-% note: xmin <-> thetamax; and Tm [MeV]-> E [V]
-E = Tm * 10^6 * elementar; %V
+% note: xmin <-> thetamax; and Tm [MeV]-> E [J]
+E = Tm * 10^6 * elementar; %J
 sigma_min = ((Zalpha * ZAu * epsilon2)/(4* E^2))^2 * 1/sin(Thetamax / 2)^4;
     %=0.0054 
     
@@ -159,7 +158,7 @@ err_A_hole = pi * 2*Rhole *err_Rhole;
 omega_tot = 4*pi;
 omega_hole = Ahole / delta^2;
 err_omega_hole = err_A_hole / delta^2;
-    activity = ct / t * omega_tot / omega_hole; %=3.3712*10^6 Bq of Am-241 source
+    activity = ct / t * omega_tot / omega_hole; %=3.3712*10^6 Bq approx 3.4MBq of Am-241 source
     err_activity = sqrt((omega_tot * err_ct / (t * omega_hole))^2 + ((t * omega_tot * err_t)/(t^2 * omega_hole))^2 );  % =5.6787e+04 Bq
             %+ ((t * omega_tot * err_omega_hole)/(t * omega_hole^2))^2:
             %negliable since err_omega_hole is small comparative to the other errors
@@ -215,6 +214,7 @@ fitt1 = fit(xData, yData, ft, 'Startpoint', [-20 1.2 -3.5 20]);
 [d1, d2] = differentiate(fitt1, xinterval);
 
 % plot discriminator curve with x axis: turns:
+%{
 figure( 'Name', 'erf' );
 h = plot( fitresult, xData, yData );
 hold on
@@ -228,6 +228,7 @@ title('discriminator curve')
 xlabel('turns')
 ylabel('counts per second')
 saveas(gcf, fullfile(fname, 'discriminator_curve.eps'), 'epsc');
+%}
 
 % 4. ANGULAR DISTRIBUTION
 % 4.1. Import the data:
@@ -289,6 +290,7 @@ saveas(gcf, fullfile(fname, 'discriminator_curve.eps'), 'epsc');
     end
     
     % CARTESIAN PLOT:
+    %{
     xspace1 = linspace(0.24, 0.42) ;
         %for the fitline:
         [XXData, YYData] = prepareCurveData( X, Y );
@@ -307,6 +309,7 @@ saveas(gcf, fullfile(fname, 'discriminator_curve.eps'), 'epsc');
     title('angular distribution')
     H = legend('data', 'fit', 'Location', 'Best');
     saveas(gcf, fullfile(fname, 'angular_distribution.eps'), 'epsc');
+    %}
     
   % 4.3 plot: Theta vs. Na / (OmegaD*t); in the loglog-plot we expect a linear dependence (cf. p10)
     % LOGLOG - PLOT:
@@ -323,7 +326,7 @@ saveas(gcf, fullfile(fname, 'discriminator_curve.eps'), 'epsc');
     coeffvals = coeffvalues(fFitresult); %=[-4.3399   -0.2400] = [a, b]
     err_b = (0.3345 + 0.1455) /2; %positive, negative direction
     err_a = (0.2710 + 0.2969)/2; %positive, negative direction
-       
+  %{     
     xspace2 = linspace(-1.4, -0.9) ;
     figure
     errorbar(XX(:), YY(:), err_YY(:), 'bo')
@@ -341,19 +344,30 @@ saveas(gcf, fullfile(fname, 'discriminator_curve.eps'), 'epsc');
     G = legend('data', 'linear fit', 'Location', 'Best');
     title('angular distribution (loglog scale)')
     saveas(gcf, fullfile(fname, 'angular_distribution_loglog.eps'), 'epsc');
-        
+%}        
+    
     C = exp(coeffvals(2)); %= 0.7866
+        err_C = sqrt((exp(b) * err_b)^2); % =0.2594
     epsilon2_tilde = 1.44;
+    energy = 3.65; % MeV
     foil_thickness = 1*10^-6; %m, Skript: 5.2.2.
     n_AK = (5.91*10^22 * 10^6) * (mAu * 10^-3) / (6.02214085774 * 10^23); %=19330 kg/m^3; literature: 19320kg/m^3 [4]
-    estimate_activity = (4 *pi * C)/(n_AK* foil_thickness * OmegaF) * ((Zalpha * ZAu * epsilon2)/(4 * Tm  * elementar *10^6))^-2; 
+    estimate_activity = (4 *pi * C)/(n_AK* foil_thickness * OmegaF) * ((Zalpha * ZAu * epsilon2_tilde)/(4 * Tm ))^(-2)
+    %estimate_activity = (4 *pi * C)/(n_AK* foil_thickness * OmegaF) * ((Zalpha * ZAu * epsilon2 * 10^-9)/(4 * elementar * energy))^-2;
+    %estimate_activity = (4*pi*C)/(n_AK * foil_thickness * OmegaF) * ((4*energy)/(ZAu * Zalpha * epsilon2_tilde *10^-9))^2
         %= 4.7078e+07 Bq according to eq (4.13): Tm in MeV
-    % error calculation:
-    err_C = sqrt((exp(b) * err_b)^2); % =0.2594
-    err_estimate_activity = sqrt((4*pi*err_C /(OmegaF *foil_thickness* n_AK) * (Zalpha*ZAu*epsilon2_tilde / (4*Tm*10^6))^-2)^2 + ...
-        (((4*pi*C)/(OmegaF*foil_thickness * n_AK))*2*((4*Tm*10^6)/(Zalpha*ZAu * epsilon2_tilde))*((4*err_Tm)/(Zalpha*ZAu*epsilon2_tilde)))^2);
+    %err_estimate_activity = sqrt((4*pi*err_C /(OmegaF *foil_thickness* n_AK) * (Zalpha*ZAu*epsilon2_tilde / (4*Tm*10^6))^-2)^2 + (((4*pi*C)/(OmegaF*foil_thickness * n_AK))*2*((4*Tm*10^6)/(Zalpha*ZAu * epsilon2_tilde))*((4*err_Tm)/(Zalpha*ZAu*epsilon2_tilde)))^2);
         % = 1.5526e+07 Bq
+    half_live_am =1.3630*10^10; % 432.2 * 365*24*3600
+    lambda = log(2) / half_live_am;
+    activity_0 = 3.7*10^6;
+    t = 1.7920*10^9; % from 1.1.1962 to 15.10.2018 = 56y 10m 15d = (56*365*24*3600 + 10*30*24*3600+15*3600)s
+    err_t = 86400; % 24*3600 s
+    activity_hl = activity_0 * exp(-lambda * t); %=3.3777e+06 Bq
+        err_activity_hl = activity_hl * (lambda) * err_t; % = 14.8411 Bq
    
+        energy_alpha = sqrt(((n_AK*foil_thickness * activity_hl)/(C))*((OmegaF)/(4*pi))*((ZAu * Zalpha*epsilon2 /4))^2) / (1.602*10^-19*10^6)^2;
+        C_control = n_AK * foil_thickness * activity_hl * OmegaF / (4*pi) * ((ZAu * Zalpha * epsilon2)/(4*3.65 *1.602*10^-19* 10^6))^2
     
 % 5. CHI SQAURE TEST
 h_angular = chi2gof(Y); %=0
